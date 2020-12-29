@@ -1,0 +1,44 @@
+'UI dependencies':
+  image: node:8.15-alpine
+  stage: dependencies
+  only:
+    changes:
+      - frontend/**/*
+      - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - frontend/node_modules/
+  dependencies: []
+  script:
+    - cd frontend
+    - yarn install
+
+'UI build':
+  image: node:8.15-alpine
+  stage: build
+  only:
+    changes:
+      - frontend/**/*
+      - .gitlab-ci.yml
+  artifacts:
+    paths:
+      - frontend/build/
+  dependencies:
+    - 'UI dependencies'
+  script:
+    - cd frontend
+    - yarn build
+
+'UI deploy':
+  stage: deploy
+  image: "ruby:2.5"
+  script:
+    - apt-get update -qy
+    - apt-get install rubygems ruby-dev -y
+    - gem install dpl
+    - cd frontend
+    - dpl --provider=heroku --app=$HEROKU_FRONTEND_NAME --api-key=$HEROKU_API_KEY --skip_cleanup
+  only:
+    changes:
+      - frontend/**/*
+      - .gitlab-ci.yml

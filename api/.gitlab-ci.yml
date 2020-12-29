@@ -1,0 +1,13 @@
+'API deploy':
+  stage: deploy
+  image: "ruby:2.5"
+  script:
+    - apt-get update -qy
+    - apt-get install rubygems ruby-dev -y
+    - gem install dpl
+    - cd api
+    - dpl --provider=heroku --app=$HEROKU_API_NAME --api-key=$HEROKU_API_KEY --skip_cleanup
+  only:
+    changes:
+      - api/**/*
+      - .gitlab-ci.yml
